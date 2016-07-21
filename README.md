@@ -22,6 +22,7 @@ Known to work on Android, iOS testers appreciated
 ## Contributors 
 
 - Nick Samoray
+- Map Vector stuff: http://barankahyaoglu.com/dev/openstreetmap-in-unity3d/
 - Hopefully more soon, everything aprpeciated from documenting to fixes/updates
  
 ## License
