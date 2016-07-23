@@ -6,18 +6,26 @@ This will be updated periodically but you are encouraged to fork and make a Pull
 
 Known to work on Android, iOS testers appreciated
 
+## Screenshots
+
+Click on the image below for a small gfy of the code in ation or click [here](https://gfycat.com/ImpressiveDeepElephant)
+
+<a href="https://gfycat.com/ImpressiveDeepElephant"><img src="/samplepic.PNG" height="300px" ></a>
+
+
 ## What this has
 
 - Tile Generation for initial load
 - Location tracking and updates
 - Vector Map translation to Unity Primitives
 - Basic pinch zoom in/out and rotate on touch
+- Character model that follows position
 
 ## What this doesn't have
 
- - A player model with animations
- - Fully functioning tile updates
  - Fully documented code
+ - Smooth Camera
+ - Other small tweaks and fixes that are needed
  
 ## Contributors 
 
