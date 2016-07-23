@@ -28,13 +28,65 @@ namespace Assets
 
         public IEnumerator CreateTile(Vector2 realPos, Vector2 worldCenter, int zoom)
         {
-            //setting up the URL
+            Vector3 tp = transform.position;
+            
+            //Tile will try to create itself from nearby tiles, otherwise it will not
+            if (Physics.CheckSphere(tp + Vector3.right * 612, 0.5f))
+            {
+                Debug.Log("-r " + gameObject.name + " from " + Physics.OverlapSphere(tp + Vector3.right * 612, 0.5f)[0].name);
+                realPos = Physics.OverlapSphere(tp + Vector3.right * 612, 0.5f)[0].GetComponent<Tile>().cen - Vector2.right;
+            }
+            else if (Physics.CheckSphere(tp - Vector3.right * 612, 0.5f))
+            {
+                Debug.Log("+r " + gameObject.name + " from " + Physics.OverlapSphere(tp - Vector3.right * 612, 0.5f)[0].name);
+                realPos = Physics.OverlapSphere(tp - Vector3.right * 612, 0.5f)[0].GetComponent<Tile>().cen + Vector2.right;
+            }
+            else if (Physics.CheckSphere(tp + Vector3.forward * 612, 0.5f))
+            {
+                Debug.Log("+u " + gameObject.name + " from " + Physics.OverlapSphere(tp + Vector3.forward * 612, 0.5f)[0].name);
+                realPos = Physics.OverlapSphere(tp + Vector3.forward * 612, 0.5f)[0].GetComponent<Tile>().cen + Vector2.up;
+            }
+            else if (Physics.CheckSphere(tp - Vector3.forward * 612, 0.5f))
+            {
+                Debug.Log("-u " + gameObject.name + " from " + Physics.OverlapSphere(tp - Vector3.forward * 612, 0.5f)[0].name);
+                realPos = Physics.OverlapSphere(tp - Vector3.forward * 612, 0.5f)[0].GetComponent<Tile>().cen - Vector2.up;
+            }
+            //diagonals
+            //honestly these should never really be called except for the beginning
+            //also may be somewhat broken atm
+            else if (Physics.CheckSphere(tp - Vector3.forward * 612 - Vector3.right * 612, 0.5f))
+            {
+                Debug.Log("--d " + gameObject.name + " from " + Physics.OverlapSphere(tp - Vector3.forward * 612 - Vector3.right * 612, 0.5f)[0].name);
+                realPos = Physics.OverlapSphere(tp - Vector3.forward * 612 - Vector3.right * 612, 0.5f)[0].GetComponent<Tile>().cen - Vector2.up - Vector2.right;
+                
+            }
+            else if (Physics.CheckSphere(tp - Vector3.forward * 612 + Vector3.right * 612, 0.5f))
+            {
+                Debug.Log("-+d " + gameObject.name + " from " + Physics.OverlapSphere(tp - Vector3.forward * 612 + Vector3.right * 612, 0.5f)[0].name);
+                realPos = Physics.OverlapSphere(tp - Vector3.forward * 612 + Vector3.right * 612, 0.5f)[0].GetComponent<Tile>().cen - Vector2.up + Vector2.right;
+                
+            }
+            else if (Physics.CheckSphere(tp + Vector3.forward * 612 - Vector3.right * 612, 0.5f))
+            {
+                Debug.Log("+-d " + gameObject.name + " from " + Physics.OverlapSphere(tp + Vector3.forward * 612 - Vector3.right * 612, 0.5f)[0].name);
+                realPos = Physics.OverlapSphere(tp + Vector3.forward * 612 - Vector3.right * 612, 0.5f)[0].GetComponent<Tile>().cen + Vector2.up - Vector2.right;
+                
+            }
+            else if (Physics.CheckSphere(tp + Vector3.forward * 612 + Vector3.right * 612, 0.5f))
+            {
+                Debug.Log("++d " + gameObject.name + " from " + Physics.OverlapSphere(tp + Vector3.forward * 612 + Vector3.right * 612, 0.5f)[0].name);
+                realPos = Physics.OverlapSphere(tp + Vector3.forward * 612 + Vector3.right * 612, 0.5f)[0].GetComponent<Tile>().cen + Vector2.up - Vector2.right;
+                
+            }
+
             cen = realPos;
+
+            //setting up the URL
             var tilename = realPos.x + "_" + realPos.y;
             var tileurl = realPos.x + "/" + realPos.y;
             var url = "http://vector.mapzen.com/osm/water,earth,buildings,roads,landuse/" + zoom + "/";
 
-            Debug.Log(url);
+            //Debug.Log(url);
             JSONObject mapData;
 
             //If the tile has been created in the past, load from memory
@@ -49,12 +101,14 @@ namespace Assets
                 var www = new WWW(url + tileurl + ".json");
                 yield return www;
 
-                var sr = File.CreateText(tilename);
+                var sr = File.CreateText(Application.persistentDataPath + "/" + tilename);
                 sr.Write(www.text);
                 sr.Close();
 
                 mapData = new JSONObject(www.text);
             }
+
+            gameObject.AddComponent<BoxCollider>();
 
             Rect = GM.TileBounds(realPos, zoom);
 
@@ -63,6 +117,7 @@ namespace Assets
             CreateWater(mapData["water"], worldCenter);
             CreateParks(mapData["landuse"], worldCenter);
             CreateRoads(mapData["roads"], worldCenter);
+            
         }
 
         private void CreateBuildings(JSONObject mapData, Vector2 worldCenter)
@@ -95,7 +150,7 @@ namespace Assets
                         var m = bh.CreateModel();
                         m.name = "building";
                         m.transform.parent = this.transform;
-                        center = new Vector3(center.x + worldCenter.x, center.y, center.z + worldCenter.y);
+                        center = new Vector3(center.x, center.y, center.z);
                         m.transform.localPosition = center;
                     }
                 }
@@ -134,7 +189,7 @@ namespace Assets
                         var m = bh.CreateModel();
                         m.name = "water";
                         m.transform.parent = this.transform;
-                        center = new Vector3(center.x + worldCenter.x, center.y, center.z + worldCenter.y);
+                        center = new Vector3(center.x, center.y, center.z);
                         m.transform.localPosition = center;
                     }
                 }
@@ -173,7 +228,7 @@ namespace Assets
                         var m = bh.CreateModel();
                         m.name = "park";
                         m.transform.parent = this.transform;
-                        center = new Vector3(center.x + worldCenter.x, center.y, center.z + worldCenter.y);
+                        center = new Vector3(center.x, center.y, center.z);
                         m.transform.localPosition = center;
                     }
                 }
@@ -194,7 +249,7 @@ namespace Assets
                 {
                     var c = geo["geometry"]["coordinates"][i];
                     var bm = GM.LatLonToMeters(c[1].f, c[0].f);
-                    var pm = new Vector2(bm.x - Rect.center.x + worldCenter.x, bm.y - Rect.center.y + worldCenter.y);
+                    var pm = new Vector2(bm.x - Rect.center.x, bm.y - Rect.center.y);
                     l.Add(pm.ToVector3xz());
                 }
 
@@ -208,6 +263,14 @@ namespace Assets
                 {
                     Debug.Log(ex);
                 }
+            }
+        }
+
+        public void Cleanup()
+        {
+            foreach(Transform t in transform)
+            {
+                Destroy(t.gameObject);
             }
         }
     }

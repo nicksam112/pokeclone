@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Linq;
+using Assets.Helpers;
+using Assets;
 
 public class tileGen : MonoBehaviour
 {
@@ -12,7 +14,9 @@ public class tileGen : MonoBehaviour
     float oldZ;
     public GameObject tile;
 
+    public Vector2 LatLng; 
     public Vector2 Center;
+    public Vector2 startTile;
     private Vector2 Position;
     private int Zoom = 16;
     string status = "start";
@@ -20,6 +24,7 @@ public class tileGen : MonoBehaviour
 
     IEnumerator Start()
     {
+        Screen.sleepTimeout = (int)SleepTimeout.NeverSleep;
         SimplePool.Preload(tile, 15);
         currX = oldX = Mathf.Floor(transform.position.x);
         currZ = oldZ = Mathf.Floor(transform.position.z);
@@ -27,22 +32,29 @@ public class tileGen : MonoBehaviour
         // No location then fallback coordinates
         if (!Input.location.isEnabledByUser)
         {
+            
+            LatLng = new Vector2(42.434605f, -83.984956f);
             Center = calcTile(42.434605f, -83.984956f);
-            Debug.Log(Center);
+            Debug.Log("Center: " + Center);
+            startTile = Center;
             Position = posInTile(42.434605f, -83.984956f);
+            
             Debug.Log(Position);
             Vector3 pos = new Vector3((Position.x - 0.5f) * 611, 0, (0.5f - Position.y) * 611);
             transform.position = pos;
             Debug.Log(pos);
             status = "no location service";
+
+            tiles[0, 0] = SimplePool.Spawn(tile, Vector3.zero, Quaternion.identity);
+            StartCoroutine(tiles[0, 0].GetComponent<Assets.Tile>().CreateTile(new Vector2(Center.x, Center.y), Vector3.zero, 16));
+
             updateBoard();
-            InvokeRepeating("updateLoc", 0.5f, 0.5f);
             yield break;
         }
 
 
         // Start service before querying location
-        Input.location.Start(1,0.1f);
+        Input.location.Start(5,5f);
         status = "rev up";
 
         // Wait until service initializes
@@ -72,16 +84,22 @@ public class tileGen : MonoBehaviour
         {
             // Access granted and location value could be retrieved
             print("Location: " + Input.location.lastData.latitude + " " + Input.location.lastData.longitude + " " + Input.location.lastData.altitude + " " + Input.location.lastData.horizontalAccuracy + " " + Input.location.lastData.timestamp);
+            LatLng = new Vector2(Input.location.lastData.latitude, Input.location.lastData.longitude);
             Center = calcTile(Input.location.lastData.latitude, Input.location.lastData.longitude);
             Debug.Log(Center);
+            startTile = Center;
             Position = posInTile(Input.location.lastData.latitude, Input.location.lastData.longitude);
             Debug.Log(Position);
             status = "Creating tile " + Center.x + ", " + Center.y;
             status = "Pos tile " + Position.x + ", " + Position.y;
             Vector3 pos = new Vector3((Position.x - 0.5f) * 611, 0, (0.5f - Position.y) * 611);
             transform.position = pos;
+
+            tiles[0,0] = SimplePool.Spawn(tile, Vector3.zero, Quaternion.identity);
+            StartCoroutine(tiles[0, 0].GetComponent<Assets.Tile>().CreateTile(new Vector2(Center.x, Center.y), Vector3.zero, 16));
+
             updateBoard();
-            InvokeRepeating("updateLoc", 0.5f, 0.5f);
+            InvokeRepeating("updateLoc", 2f, 2f);
         }
     }
 
@@ -89,6 +107,7 @@ public class tileGen : MonoBehaviour
     {
         //updates location
         status = "repeating";
+        LatLng = new Vector2(Input.location.lastData.latitude, Input.location.lastData.longitude);
         Center = calcTile(Input.location.lastData.latitude, Input.location.lastData.longitude);
         Debug.Log(Center);
         Position = posInTile(Input.location.lastData.latitude, Input.location.lastData.longitude);
@@ -100,9 +119,9 @@ public class tileGen : MonoBehaviour
     // checks if movement is greate than a single tile space, if so update the board
     void Update()
     {
-        currX = Mathf.Floor(transform.position.x) - Mathf.Floor(transform.position.x) % 611;
-        currZ = Mathf.Floor(transform.position.z) - Mathf.Floor(transform.position.z) % 611;
-        if (Mathf.Abs(currX - oldX) > 600 || Mathf.Abs(currZ - oldZ) > 600)
+        currX = Mathf.Floor(transform.position.x) - Mathf.Floor(transform.position.x) % 612;
+        currZ = Mathf.Floor(transform.position.z) - Mathf.Floor(transform.position.z) % 612;
+        if (Mathf.Abs(currX - oldX) > 306 || Mathf.Abs(currZ - oldZ) > 306)
         {
             Debug.Log("UPDATE BOARD");
             updateBoard();
@@ -112,7 +131,6 @@ public class tileGen : MonoBehaviour
     }
 
     //checks if theres a tile in that location, if not then put one down
-    //TODO: check/fix moving several tiles over
     void updateBoard()
     {
         for (int i = -1; i <= 1; i++)
@@ -120,13 +138,18 @@ public class tileGen : MonoBehaviour
             for (int j = -1; j <= 1; j++)
             {
                 localTerrain[i + 1, j + 1] = new Vector2(Center.x + i, Center.y + j);
-                if (!Physics.CheckSphere(new Vector3(currX + i * 306, 0, currZ + j * 611), 0.4f))
+                if (!Physics.CheckSphere(new Vector3(currX + i * 612, 0, currZ + j * 612), 0.4f))
                 {
-                    tiles[i + 1, j + 1] = SimplePool.Spawn(tile, new Vector3(currX + i * 306, 0f, currZ + j * 611), Quaternion.identity);
-                    StartCoroutine(tiles[i + 1, j + 1].GetComponent<Assets.Tile>().CreateTile(new Vector2(Center.x + i, Center.y - j), new Vector3(currX + i * 306, 0f, currZ + j * 611), 16));
+                    tiles[i + 1, j + 1] = SimplePool.Spawn(tile, new Vector3(currX + i * 612, 0f, currZ + j * 612), Quaternion.identity);
+                    StartCoroutine(tiles[i + 1, j + 1].GetComponent<Tile>().CreateTile(new Vector2(Center.x + i, Center.y - j), new Vector3(currX + i * 612, 0f, currZ + j * 611), 16));
+                    //old legacy code, ignore
+                    //StartCoroutine(tiles[i + 1, j + 1].GetComponent<Assets.Tile>().CreateTile(new Vector2(Center.x + i + (int)(tiles[i + 1, j + 1].transform.position.x/612), Center.y - j), new Vector3(currX + i * 306, 0f, currZ + j * 611), 16));
+                    //StartCoroutine(tiles[i + 1, j + 1].GetComponent<Assets.Tile>().CreateTile(GM.MetersToTile(pt, Zoom), new Vector3(currX + i * 306, 0f, currZ + j * 611), 16));
+                    //StartCoroutine(tiles[i + 1, j + 1].GetComponent<Assets.Tile>().CreateTile(new Vector2((int)(startTile.x + (tiles[i + 1, j + 1].transform.position.x / 307f)), (int)(startTile.y - (tiles[i + 1, j + 1].transform.position.z / 307f))), new Vector3(currX + i * 306, 0f, currZ + j * 612), 16));
+                    //Debug.Log("Offset " + (int)(startTile.x + (tiles[i + 1, j + 1].transform.position.x / 306)) + ", " + (int)(startTile.y + (tiles[i + 1, j + 1].transform.position.z / 306)));
                 }
                 else {
-                    Collider[] temp = Physics.OverlapSphere(new Vector3(currX + i * 306, 0f, currZ + j * 611), 0.4f);
+                    Collider[] temp = Physics.OverlapSphere(new Vector3(currX + i * 612, 0f, currZ + j * 612), 0.4f);
                     tiles[i + 1, j + 1] = temp[0].gameObject;
                 }
             }
@@ -144,6 +167,7 @@ public class tileGen : MonoBehaviour
         {
             if (g.tag == "Tile")
             {
+                g.GetComponent<Tile>().Cleanup();
                 SimplePool.Despawn(g.gameObject);
             }
         }

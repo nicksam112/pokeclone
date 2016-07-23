@@ -33,6 +33,7 @@ namespace Assets
             for (int i = 1; i < _verts.Count; i++)
             {
                 GameObject roadPlane = GameObject.CreatePrimitive(PrimitiveType.Plane);
+                roadPlane.GetComponent<MeshCollider>().enabled = false;
                 roadPlane.transform.position = tile.transform.position + ((verts[i] + verts[i-1]) / 2);
                 Vector3 scale = roadPlane.transform.localScale;
                 scale.z = Vector3.Distance(verts[i], verts[i-1]) / 10;

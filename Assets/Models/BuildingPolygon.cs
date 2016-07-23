@@ -19,14 +19,14 @@ namespace Assets
             var tris = new Triangulator(verts.Select(x => x.ToVector2xz()).ToArray());
             var mesh = new Mesh();
 
-            var vertices = verts.Select(x => new Vector3(x.x, 0.1f, x.z)).ToList();
+            var vertices = verts.Select(x => new Vector3(x.x, 0.2f, x.z)).ToList();
             var indices = tris.Triangulate().ToList();
 
             var n = vertices.Count;
             for (int index = 0; index < n; index++)
             {
                 var v = vertices[index];
-                vertices.Add(new Vector3(v.x, 0.1f, v.z));
+                vertices.Add(new Vector3(v.x, 0.2f, v.z));
             }
 
             for (int i = 0; i < n - 1; i++)
