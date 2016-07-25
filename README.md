@@ -30,6 +30,7 @@ Click on the image below for a small gfy of the code in ation or click [here](ht
 ## Contributors 
 
 - Nick Samoray
+- KayelGe: Android file save/load fix and cleaning up a bad merge
 - Map Vector stuff: http://barankahyaoglu.com/dev/openstreetmap-in-unity3d/
 - Hopefully more soon, everything appreciated from documenting to fixes/updates
  
