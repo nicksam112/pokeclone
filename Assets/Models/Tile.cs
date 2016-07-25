@@ -91,8 +91,7 @@ namespace Assets
 
             //If the tile has been created in the past, load from memory
             //otherwise fetch from online and store a copy locally
-            //currently, temporary workaround in place
-            if (File.Exists(tilename + "ignore"))
+            if (File.Exists(Application.persistentDataPath + "/" + tilename))
             {
                 var r = new StreamReader(tilename, Encoding.Default);
                 mapData = new JSONObject(r.ReadToEnd());
@@ -101,16 +100,10 @@ namespace Assets
             {
                 var www = new WWW(url + tileurl + ".json");
                 yield return www;
-
-<<<<<<< HEAD
+                
                 var sr = File.CreateText(Application.persistentDataPath + "/" + tilename);
                 sr.Write(www.text);
                 sr.Close();
-=======
-                //var sr = File.CreateText(tilename);
-                //sr.Write(www.text);
-                //sr.Close();
->>>>>>> origin/master
 
                 mapData = new JSONObject(www.text);
             }
