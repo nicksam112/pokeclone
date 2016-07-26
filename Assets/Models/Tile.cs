@@ -82,7 +82,7 @@ namespace Assets
             cen = realPos;
 
             //setting up the URL
-            var tilename = realPos.x + "_" + realPos.y;
+            var tilename = Application.persistentDataPath + "/" + realPos.x + "_" + realPos.y;
             var tileurl = realPos.x + "/" + realPos.y;
             var url = "http://vector.mapzen.com/osm/water,earth,buildings,roads,landuse/" + zoom + "/";
 
@@ -91,7 +91,7 @@ namespace Assets
 
             //If the tile has been created in the past, load from memory
             //otherwise fetch from online and store a copy locally
-            if (File.Exists(Application.persistentDataPath + "/" + tilename))
+            if (File.Exists(tilename))
             {
                 var r = new StreamReader(tilename, Encoding.Default);
                 mapData = new JSONObject(r.ReadToEnd());
@@ -101,7 +101,7 @@ namespace Assets
                 var www = new WWW(url + tileurl + ".json");
                 yield return www;
                 
-                var sr = File.CreateText(Application.persistentDataPath + "/" + tilename);
+                var sr = File.CreateText(tilename);
                 sr.Write(www.text);
                 sr.Close();
 
