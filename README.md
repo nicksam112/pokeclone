@@ -4,6 +4,8 @@ Pokemon GO clone Created in Unity 5
 By no means complete, but a solid start nonetheless. 
 This will be updated periodically but you are encouraged to fork and make a Pull Request if you have a fix, update, or documentation.
 
+**If you are experiencing issues with this project please file an issue detailing it.** I can't troubleshoot every email but if y'all file an issue it'll be easier to keep track of potential problems
+
 Known to work on Android, iOS testers appreciated
 
 ## Screenshots
