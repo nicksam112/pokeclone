@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -32,8 +32,10 @@ namespace Assets
             _verts = verts;
             for (int i = 1; i < _verts.Count; i++)
             {
-                GameObject roadPlane = GameObject.CreatePrimitive(PrimitiveType.Plane);
-                roadPlane.GetComponent<MeshCollider>().enabled = false;
+                
+             GameObject roadPlane = CreateMesh(5);
+             roadPlane.GetComponent<Renderer>().material = Resources.Load("roadMaterial") as Material;
+             
                 roadPlane.transform.position = tile.transform.position + ((verts[i] + verts[i-1]) / 2);
                 Vector3 scale = roadPlane.transform.localScale;
                 scale.z = Vector3.Distance(verts[i], verts[i-1]) / 10;
@@ -42,6 +44,34 @@ namespace Assets
                 roadPlane.transform.parent = tile.transform;
             }
         }
+        
+      private  GameObject CreateMesh(float size)
+	{
+		Mesh m = new Mesh();
+		
+		m.vertices = new Vector3[] {
+			new Vector3(-size,0, size),
+			new Vector3(size, 0, size),
+			new Vector3(size, 0, -size),
+			new Vector3(-size, 0, -size)
+		};
+		
+		m.uv = new Vector2[] {
+			new Vector2 (0, 0),
+			new Vector2 (0, 1),
+			new Vector2(1, 1),
+			new Vector2 (1, 0)
+		};
+		m.triangles = new int[] { 0, 1, 2, 0, 2, 3};
+		m.RecalculateNormals();
+
+		GameObject scriptedPlane = new GameObject ();
+		scriptedPlane.AddComponent<MeshRenderer>();
+		MeshFilter meshas = scriptedPlane.AddComponent<MeshFilter>();
+		meshas.mesh =m;
+
+		return scriptedPlane;
+	}
 
         private void Update()
         {
