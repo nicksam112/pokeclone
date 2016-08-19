@@ -33,6 +33,7 @@ Click on the image below for a small gfy of the code in ation or click [here](ht
 
 - Nick Samoray
 - KayelGee: Android file save/load fix and cleaning up a bad merge
+- TylusKinas: Road updates, optimizing and added material
 - Map Vector stuff: http://barankahyaoglu.com/dev/openstreetmap-in-unity3d/
 - Hopefully more soon, everything appreciated from documenting to fixes/updates
  
